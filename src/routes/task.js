@@ -1,7 +1,7 @@
 /** @format */
 
 const express = require("express");
-const Task = require("../models/taskModel");
+const Task = require("../models/task");
 const router = express.Router();
 
 //Getting Tasks
@@ -74,8 +74,10 @@ router.patch("/tasks/:id", async (req, res) => {
         return res.status(400).send("Invalid Update!")
     }
   try {
-    const toUpdate = await Task.findByIdAndUpdate(req.params.id, req.body,{new: true, runValidators: true});
-    if (!toUpdate) {
+    const task = await Task.findById(req.params.id);
+    updates.forEach(update => task[update] = req.body[update])
+    await task.save()
+    if (!task) {
       return res.status(404).send();
     }
     res.status(200).send("Updated task successfully!");
@@ -83,16 +85,5 @@ router.patch("/tasks/:id", async (req, res) => {
     res.status(400).send();
   }
 });
-
-// router.patch("/task",(req,res) => {
-//     const _id = req.params.id;
-//     const updatedData = req.body
-//     Task.findByIdAndUpdate(_id, updatedData).then((task)=> {
-//         if(!task){
-//             return res.status(404).send()
-//         }
-//         res.status(200).send('Updated task successfully!')
-//     }).catch(err => res.status(500).send(err))
-// })
 
 module.exports = router;

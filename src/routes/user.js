@@ -1,7 +1,7 @@
 /** @format */
 
 const express = require("express");
-const User = require("../models/userModel");
+const User = require("../models/user");
 const router = express.Router();
 
 //Getting Users
@@ -13,6 +13,7 @@ router.get("/users", async (req, res) => {
     res.status(500).send();
   }
 });
+
 
 router.get("/users/:id", async (req, res) => {
   const _id = req.params.id;
@@ -68,15 +69,19 @@ router.delete("/users/:id", async (req, res) => {
 //Updating Users
 router.patch("/users/:id", async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ["name","email","password","age"];
-  const isValidOperation = updates.every(update => allowedUpdates.includes(update))
+  const allowedUpdates = ["name", "email", "password", "age"];
+  const isValidOperation = updates.every((update) =>
+    allowedUpdates.includes(update)
+  );
 
-  if(!isValidOperation){
-      return res.status(400).send("Invalid Update!")
+  if (!isValidOperation) {
+    return res.status(400).send("Invalid Update!");
   }
   try {
-    const toUpdate = await User.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true});
-    if (!toUpdate) {
+    const user = await User.findById(req.params.id);
+    updates.forEach((update) => user[update] = req.body[update]);
+    await user.save();
+    if (!user) {
       return res.status(404).send();
     }
     res.status(200).send("Updated user successfully!");
