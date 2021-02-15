@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
     trim: true,
     required: true,
     minLength: 3,
+    lowercase: true,
     validate(value) {
       if (validator.isDivisibleBy(value, 1)) {
         throw new Error("Name should be a valid string");
@@ -17,6 +18,7 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
+    unique: true,
     trim: true,
     required: true,
     lowercase: true,
@@ -64,6 +66,19 @@ userSchema.pre("save", async function (next) {
   }
   next();
 });
+
+userSchema.statics.findByCredentials = async function (email, password) {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Error("Unable to login");
+  }
+
+  const isMatch = bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    throw new Error("Unable to login");
+  }
+  return user;
+};
 
 const User = mongoose.model("User", userSchema);
 
