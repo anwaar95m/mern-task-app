@@ -2,15 +2,16 @@
 
 const express = require("express");
 const User = require("../models/user");
-const auth = require("../middlewares/auth")
+const auth = require("../middlewares/auth");
 const router = express.Router();
 
 //Getting Users
-router.get("/users/me",auth,async (req, res) => {
-  res.send(req.user)
+
+router.get("/users/me", auth, async (req, res) => {
+  res.send(req.user);
 });
 
-router.get("/users",async (req, res) => {
+router.get("/users", async (req, res) => {
   try {
     const userList = await User.find({});
     res.status(200).send(userList);
@@ -35,7 +36,6 @@ router.get("/users/:id", async (req, res) => {
 
 //Adding new Users
 router.post("/users", async (req, res) => {
-  test()
   const user = await new User(req.body);
   try {
     await user.save();
@@ -60,55 +60,30 @@ router.post("/users/login", async (req, res) => {
   }
 });
 
-router.post("/users/logout",auth , async (req, res) => {
+router.post("/users/logout", auth, async (req, res) => {
   try {
-      req.user.tokens = req.user.tokens.filter((token) => token.token !== req.token)
-      await req.user.save();
-      res.send();
+    req.user.tokens = req.user.tokens.filter(
+      (token) => token.token !== req.token
+    );
+    await req.user.save();
+    res.send();
   } catch (error) {
     res.status(500).send();
   }
 });
 
-router.post("/users/logoutAll",auth , async (req, res) => {
+router.post("/users/logoutAll", auth, async (req, res) => {
   try {
-      req.user.tokens = []
-      await req.user.save();
-      res.send();
-  } catch (error) {
-    res.status(500).send();
-  }
-});
-
-//Deleting Users
-router.delete("/users", async (req, res) => {
-  const name = req.params.name;
-  try {
-    const deleted = await User.deleteMany({ name });
-    if (!deleted) {
-      return res.status(404).send();
-    }
-    res.status(200).send(`Deleted users successfully!`);
-  } catch (error) {
-    res.status(500).send();
-  }
-});
-
-router.delete("/users/:id", async (req, res) => {
-  const _id = req.params.id;
-  try {
-    const toDelete = await User.findByIdAndDelete(_id);
-    if (!toDelete) {
-      return res.status(404).send();
-    }
-    res.status(200).send("Deleted user successfully!");
+    req.user.tokens = [];
+    await req.user.save();
+    res.send();
   } catch (error) {
     res.status(500).send();
   }
 });
 
 //Updating Users
-router.patch("/users/:id", async (req, res) => {
+router.patch("/users/me", auth , async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ["name", "email", "password", "age"];
   const isValidOperation = updates.every((update) =>
@@ -119,16 +94,24 @@ router.patch("/users/:id", async (req, res) => {
     return res.status(400).send("Invalid Update!");
   }
   try {
-    const user = await User.findById(req.params.id);
-    updates.forEach((update) => (user[update] = req.body[update]));
-    await user.save();
-    if (!user) {
-      return res.status(404).send();
-    }
-    res.status(200).send("Updated user successfully!");
+    updates.forEach((update) => (req.user[update] = req.body[update]));
+    await req.user.save();
+    res.status(200).send(req.user);
   } catch (error) {
     res.status(400).send();
   }
 });
+
+//Deleting Users
+router.delete("/users/me", auth, async (req, res) => {
+  try {
+    await req.user.remove();
+    res.send(req.user);
+  } catch (error) {
+    res.status(500).send();
+  }
+});
+
+
 
 module.exports = router;

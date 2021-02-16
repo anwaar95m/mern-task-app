@@ -13,7 +13,7 @@ const auth = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.send(404);Authorization
+      return res.send(404);
     }
     req.token = token;
     req.user = user;
