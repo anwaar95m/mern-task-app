@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 8080;
 
 
 app.get('/',async (req,res)=>{
-    res.send("Hello Express!")
+    res.send("Server running...")
 })
 
 app.use(express.json())
