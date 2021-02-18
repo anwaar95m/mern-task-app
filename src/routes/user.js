@@ -77,28 +77,28 @@ router.get("/users/me", auth, async (req, res) => {
   res.send(req.user);
 });
 
-//Getting Users
-router.get("/users", async (req, res) => {
-  try {
-    const userList = await User.find({});
-    res.status(200).send(userList);
-  } catch (error) {
-    res.status(500).send();
-  }
-});
+// //Getting Users
+// router.get("/users", async (req, res) => {
+//   try {
+//     const userList = await User.find({});
+//     res.status(200).send(userList);
+//   } catch (error) {
+//     res.status(500).send();
+//   }
+// });
 
-router.get("/users/:id", async (req, res) => {
-  const _id = req.params.id;
-  try {
-    const found = await User.findById(_id);
-    if (!found) {
-      return res.status(404).send();
-    }
-    res.status(200).send(found);
-  } catch (error) {
-    res.status(500).send();
-  }
-});
+// router.get("/users/:id", async (req, res) => {
+//   const _id = req.params.id;
+//   try {
+//     const found = await User.findById(_id);
+//     if (!found) {
+//       return res.status(404).send();
+//     }
+//     res.status(200).send(found);
+//   } catch (error) {
+//     res.status(500).send();
+//   }
+// });
 
 //Logging In
 router.post("/users/login", async (req, res) => {
