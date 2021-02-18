@@ -8,25 +8,6 @@ const { MongoClient } = require("mongodb");
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-
-const multer = require("multer");
-
-const upload = multer({
-  dest: "images",
-  limits: 1000000,
-  fileFilter(req, file, cb) {
-    if (!file.originalname.match(/\.(doc|docx)$/)) {
-      return cb("File must be a document");
-    }
-    cb(undefined, true);
-  },
-});
-
-//Uploading user profile
-app.post("/upload", upload.single("upload"), function (req, res) {
-  res.send("Uploaded Profile Picture!");
-});
-
 app.get("/", async (req, res) => {
   res.send("Server running...");
 });

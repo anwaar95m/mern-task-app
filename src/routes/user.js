@@ -3,6 +3,7 @@
 const express = require("express");
 const User = require("../models/user");
 const auth = require("../middlewares/auth");
+const sharp = require('sharp');
 const router = express.Router();
 
 const multer = require("multer");
@@ -22,7 +23,8 @@ router.post(
   auth,
   upload.single("avatar"),
   async (req, res) => {
-    req.user.avatar = req.file.buffer;
+    const buffer = await sharp(req.file.buffer).resize({height:250,width:250}).png().toBuffer();
+    req.user.avatar = buffer;
     await req.user.save();
     res.send("Uploaded Profile Picture!");
   },
@@ -42,6 +44,20 @@ router.delete(
   }
 );
 
+//Getting user profile
+router.get("/users/:id/avatar", async (req, res) => {
+  const _id = req.params.id;
+  try {
+    const user = await User.findById(_id);
+    if (!user || !user.avatar) {
+      throw new Error()
+    }
+    res.set('Content-Type','img/png')
+    res.status(200).send(user.avatar);
+  } catch (error) {
+    res.status(404).send();
+  }
+});
 
 //Adding new Users
 router.post("/users", async (req, res) => {
