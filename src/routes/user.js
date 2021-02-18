@@ -5,12 +5,62 @@ const User = require("../models/user");
 const auth = require("../middlewares/auth");
 const router = express.Router();
 
-//Getting Users
+const multer = require("multer");
+const upload = multer({
+  limits: 1000000,
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(jpg|png|jpeg)$/)) {
+      return cb(new Error("File must be a jpg , png or jpeg"));
+    }
+    cb(undefined, true);
+  },
+});
 
+//Uploading user profile
+router.post(
+  "/users/me/avatar",
+  auth,
+  upload.single("avatar"),
+  async (req, res) => {
+    req.user.avatar = req.file.buffer;
+    await req.user.save();
+    res.send("Uploaded Profile Picture!");
+  },
+  (error, req, res, next) => {
+    res.status(400).send({ error: error.message });
+  }
+);
+
+//Deleting user's profile
+router.delete(
+  "/users/me/avatar",
+  auth,
+  async (req, res) => {
+    req.user.avatar = undefined;
+    await req.user.save();
+    res.send("Deleted Profile Picture!");
+  }
+);
+
+
+//Adding new Users
+router.post("/users", async (req, res) => {
+  const user = await new User(req.body);
+  try {
+    await user.save();
+    const token = await user.generateAuthToken();
+    res.status(201).send({ user, token });
+  } catch (error) {
+    res.status(400).send();
+  }
+});
+
+//Getting User profile
 router.get("/users/me", auth, async (req, res) => {
   res.send(req.user);
 });
 
+//Getting Users
 router.get("/users", async (req, res) => {
   try {
     const userList = await User.find({});
@@ -30,19 +80,6 @@ router.get("/users/:id", async (req, res) => {
     res.status(200).send(found);
   } catch (error) {
     res.status(500).send();
-  }
-});
-
-
-//Adding new Users
-router.post("/users", async (req, res) => {
-  const user = await new User(req.body);
-  try {
-    await user.save();
-    const token = await user.generateAuthToken();
-    res.status(201).send({ user, token });
-  } catch (error) {
-    res.status(400).send();
   }
 });
 
@@ -83,7 +120,7 @@ router.post("/users/logoutAll", auth, async (req, res) => {
 });
 
 //Updating Users
-router.patch("/users/me", auth , async (req, res) => {
+router.patch("/users/me", auth, async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ["name", "email", "password", "age"];
   const isValidOperation = updates.every((update) =>
@@ -111,7 +148,5 @@ router.delete("/users/me", auth, async (req, res) => {
     res.status(500).send();
   }
 });
-
-
 
 module.exports = router;
