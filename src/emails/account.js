@@ -1,18 +1,19 @@
 /** @format */
 
-var nodemailer = require("nodemailer");
+const nodemailer = require("nodemailer");
+require('dotenv').config()
 
-var transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "yourmail@gmail.com",
-    pass: "yourPassword",
+    user: process.env.USER,
+    pass: process.env.PASSWORD,
   },
 });
 
 const sendWelcomeEmail = (email, name) => {
-  var mailOptions = {
-    from: "yourmail@gmail.com",
+  const mailOptions = {
+    from: process.env.USER,
     to: email,
     subject: "Thanks for joining in!",
     text: `Welcome to the app, ${name}. Let me know how you get along with the app.`,
@@ -27,8 +28,8 @@ const sendWelcomeEmail = (email, name) => {
 };
 
 const sendCancelationEmail = (email, name) => {
-  var mailOptions = {
-    from: "yourmail@gmail.com",
+  const mailOptions = {
+    from: process.env.USER,
     to: email,
     subject: "Sorry to see you go!",
     text: `Goodbye, ${name}. I hope to see you back sometime soon.`,

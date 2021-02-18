@@ -1,6 +1,7 @@
 /** @format */
 
 const mongoose = require("mongoose");
+require('dotenv').config()
 const validator = require("validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -109,7 +110,7 @@ userSchema.methods.generateAuthToken = async function () {
   const user = this;
   const token = await jwt.sign(
     { _id: user._id.toString() },
-    "Thisismytaskmanagerwebsite"
+    process.env.JWT_SECRET
   );
 
   user.tokens = user.tokens.concat({ token });

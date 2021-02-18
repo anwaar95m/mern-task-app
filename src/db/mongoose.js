@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+require('dotenv').config()
 
-const connectionUrl = "mongodb://127.0.0.1:27017/task-manager";
+const connectionUrl = process.env.DB_URL;
 mongoose.connect(connectionUrl , {useUnifiedTopology: true,useNewUrlParser: true, useCreateIndex: true , useFindAndModify: false});
